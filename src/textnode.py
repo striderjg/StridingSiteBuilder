@@ -1,4 +1,5 @@
 from enum import Enum
+import re
 
 class TextType(Enum):
     NORMAL = "normal"
@@ -49,3 +50,20 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
                 TextNode(text, n.text_type, n.url)
             )
     return new_nodes
+
+def extract_markdown_images(text):
+    alt_text_lst = re.findall(r"(?:!\[)([^\]]*?)(?:\]\(.*?\))", text)
+    img_link_lst = re.findall(r"(?:!\[[^\]]*?\]\()([^\)]*?)(?:\))", text)
+    if(len(alt_text_lst) != len(img_link_lst)):
+        raise Exception("Found unequal links vs alt texts")
+    
+    return list(zip(alt_text_lst, img_link_lst))
+
+def extract_markdown_links(text):
+    alt_text_lst = re.findall(r"(?:\[)([^\]]*?)(?:\]\(.*?\))", text)
+    img_link_lst = re.findall(r"(?:\[[^\]]*?\]\()([^\)]*?)(?:\))", text)
+
+    if(len(alt_text_lst) != len(img_link_lst)):
+        raise Exception("Found unequal links vs alt texts")
+    
+    return list(zip(alt_text_lst, img_link_lst))
