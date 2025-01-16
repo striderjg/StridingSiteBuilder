@@ -2,7 +2,9 @@
 from textnode import *
 from leafnode import LeafNode
 from shutil import rmtree, copy
+from webgen import WebGen
 import os
+import re
 
 GENERATED_DIR = "public"
 STATIC_DIR = "static"
@@ -33,10 +35,13 @@ def __r_copy(src, dest):
             new_dir = os.path.join(dest, content)
             os.mkdir(new_dir)
             __r_copy(content_path, new_dir)
-            
-            
 
+def extract_title(markdown):
+    title = re.search(r"^#\s(.*?)$", markdown, re.M)
+    #print(title.group(1))
+    return title.group(1)
 
+'''
 def text_node_to_html_node(text_node):
     match(text_node.text_type):
         case TextType.NORMAL:
@@ -66,10 +71,14 @@ def link_to_html_node(node):
 def image_to_html_node(node):
     return
 
+    '''
+
 def main():
     tree_copy(STATIC_DIR, GENERATED_DIR)
-
-
+    wg = WebGen()
+    out_path = os.path.join(GENERATED_DIR, "index.html")
+    wg.generate_page("content/index.md", "template.html", out_path)
+    
 
 if __name__ == "__main__":
     main()

@@ -26,16 +26,16 @@ class TextNode:
         props = None
         match self.text_type:
             case TextType.BOLD:
-                html_tag = "B"
+                html_tag = "b"
             case TextType.ITALIC:
-                html_tag = "I"
+                html_tag = "i"
             case TextType.CODE:
-                html_tag = "CODE"
+                html_tag = "code"
             case TextType.LINK:
                 html_tag = "a"
                 props = {"href": self.url}
             case TextType.IMAGE:
-                html_tag = "IMG"
+                html_tag = "img"
                 props = {"src": self.url, "alt": self.text}
                 html_body = None
 
@@ -105,17 +105,25 @@ def extract_markdown_links(text):
 # in:   list of TextNode
 # out:  list of TextNodes split by inline image markup   
 def split_nodes_image(old_nodes):
-    return __split_nodes_image_link(extract_markdown_images, old_nodes, "![")
+    return __split_nodes_image_link(extract_markdown_images, old_nodes, TextType.IMAGE)
 
 # in:   list of TextNode
 # out:  list of TextNodes split by inline image markup   
 def split_nodes_link(old_nodes):
-    return __split_nodes_image_link(extract_markdown_links, old_nodes, "[")
+    return __split_nodes_image_link(extract_markdown_links, old_nodes, TextType.LINK)
 
 # in:   Function to extract elements,  list of TextNode, characters to start split
 # out:  list of TextNodes split by inline link markup   
-def __split_nodes_image_link(extract_func, old_nodes, start_delim):
+def __split_nodes_image_link(extract_func, old_nodes, node_type):
     new_nodes = []
+
+    if(node_type == TextType.IMAGE):
+        start_delim = "!["
+    elif(node_type == TextType.LINK):
+        start_delim = "["
+    else:
+        raise ValueError("__split_nodes_image_link(extract_func, old_nodes, node_type) recieved an invalid type")
+        
     
     # for every TextNode passed in
     for n in old_nodes:
@@ -132,7 +140,7 @@ def __split_nodes_image_link(extract_func, old_nodes, start_delim):
                 new_nodes.append( TextNode(pre_text, n.text_type, n.url) )
 
             # construct and append the image node
-            new_nodes.append( TextNode(alt_txt, TextType.IMAGE, link) )
+            new_nodes.append( TextNode(alt_txt, node_type, link) )
 
             # Keep working on remaining text
             text = post_text
