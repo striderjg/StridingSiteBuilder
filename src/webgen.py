@@ -21,16 +21,21 @@ class WebGen:
     # OUT:      Generates page at dest_path
     def generate_page(self, from_path, template_path, dest_path):
         print(f"Generating page from {from_path} to {dest_path} using {template_path}")
-        if not os.path.exists(from_path) or not os.path.exists(template_path):
+        if not os.path.exists(from_path):
             raise Exception("generage_page recieved invalid filenames")
+        if template_path and not os.path.exists(template_path):
+            raise Exception("generage_page recieved invalid filenames")
+        elif not self.template_file:
+            raise Exception("WebGen.generate_page(...) expects a valid path to a template or the tempalte to be set in class before call")
         
         markup_fh = open(from_path)
         self.markdown_file = markup_fh.read()
         markup_fh.close()
 
-        template_fh = open(template_path)
-        self.template_file = template_fh.read()
-        template_fh.close()
+        if template_path:
+            template_fh = open(template_path)
+            self.template_file = template_fh.read()
+            template_fh.close()
 
         self.markdown_to_html_node(self.markdown_file)
         self.extract_title()
@@ -38,16 +43,52 @@ class WebGen:
         self.html_page = re.sub(r"\{\{\sTitle\s\}\}", self.title, self.template_file)
         self.html_page = re.sub(r"\{\{\sContent\s\}\}", self.html_head.to_html(), self.html_page )
 
-        print(self.html_page)
+        #print(self.html_page)
 
         if not os.path.exists(os.path.dirname(dest_path) ):
             os.mkdir(os.path.dirname(dest_path))
         out_file_fh = open(dest_path, "w")
         out_file_fh.write(self.html_page)
-        return
+    
+    # Desc:     Recursivcely generate pages from markup in dir_path_content using template_path, and write to dest_dir_path
+    # IN:       dir_path_content -> string -> Path to content directory
+    # IN:       template_path -> string -> path to template html file
+    # IN:       dest_dir_path -> string -> Path to directory to write output
+    # OUT:      Generate and Writes html files to dest_dir_path 
+    # Throws:   Exception
+    def generate_pages_recursive(self, dir_path_content, template_path, dest_dir_path):
+        if not os.path.exists(dir_path_content) and os.path.isdir(dir_path_content):
+            raise Exception("generage_page recieved invalid directory to content")
+        if template_path and (not os.path.exists(template_path) or not os.path.isfile(template_path) ):
+            raise Exception("generage_page recieved invalid template filenames")
+        elif not self.template_file:
+            raise Exception("WebGen.generate_page(...) expects a valid path to a template or the tempalte to be set in class before call")
+        
+        if not os.path.exists(dest_dir_path):
+            os.mkdir(dest_dir_path)        
+        
+        dir_contents = os.listdir(dir_path_content)
+        for dir_item in dir_contents:
+            item_path = os.path.join(dir_path_content, dir_item)
+            dest_path = os.path.join(dest_dir_path, dir_item)
+            if os.path.isfile(item_path):
+                dest_path = re.sub(r"\.md$", ".html", dest_path)
+                self.generate_page(item_path, template_path, dest_path)
+            elif os.path.isdir(item_path):
+                print("hi")
+                self.generate_pages_recursive(item_path, template_path, dest_path)
+    
+    def load_template(self, template_path):
+        if not os.path.exists(template_path):
+            raise Exception("WebGen.load_template(template_path) recieved invalid path to template")
+        
+        template_fh = open(template_path)
+        self.template_file = template_fh.read()
+        template_fh.close()
     
     # Desc:     WebGen Method.  Extracts title from attribute markdown_file and stores in attribute title
     # Desc:     self.markdown_file set with string containing  markdown
+    # Throw:    Exception("WebGen.extract_title() - No H1 in markdown to set title") if no H1 in markup
     def extract_title(self):
         title = re.search(r"^#\s(.*?)$", self.markdown_file, re.M)
         if(not title):

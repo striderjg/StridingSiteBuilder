@@ -8,6 +8,7 @@ import re
 
 GENERATED_DIR = "public"
 STATIC_DIR = "static"
+CONTENT_DIR = "content"
 
 def tree_copy(src, dest):
     dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -39,8 +40,8 @@ def __r_copy(src, dest):
 def main():
     tree_copy(STATIC_DIR, GENERATED_DIR)
     wg = WebGen()
-    out_path = os.path.join(GENERATED_DIR, "index.html")
-    wg.generate_page("content/index.md", "template.html", out_path)
+    wg.load_template("template.html")
+    wg.generate_pages_recursive(CONTENT_DIR, None, GENERATED_DIR)
     
 
 if __name__ == "__main__":
