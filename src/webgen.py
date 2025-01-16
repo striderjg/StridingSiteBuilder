@@ -6,7 +6,7 @@ from htmlnode import HTMLNode
 
 class WebGen:
     def __init__(self):
-        self.html_head = ParentNode("div", None)
+        self.html_head = ParentNode("div", [])
 
     # Desc:     WebGen method.  Takes a string containing markdown formated text and constructs
     # Desc:     a tree of HTMLNodes as attribute of WebGen
@@ -20,7 +20,8 @@ class WebGen:
         for block in blocks_lst:
             block_html_node = self.__block_to_html(block)
             html_nodes_list.append(block_html_node)
-        return html_nodes_list
+        self.html_head.children = html_nodes_list
+        return self.html_head
     # Helper Funcs for markdown_to_html_ndoe
     
     # Desc:     takes a string containing a block of markup text and returns a tree of htmlnodes
@@ -63,13 +64,48 @@ class WebGen:
                     )),
                     None
                 )
-                pass
             case "quote":
-                pass
+                block = re.sub(r"^>", "", block, 0,  re.M)
+                #print(block)
+                block_text_nodes = text_to_textnodes(block)
+                block_html_node_head = ParentNode(
+                    "BLOCKQUOTE",
+                    list( map(
+                        lambda n: n.to_html_node(), block_text_nodes
+                    )),
+                    None
+                )
             case "unordered_list":
-                pass
+                block = re.sub(r"^[*-]\s", "", block, 0,  re.M)
+                #print(block)
+                block_html_node_head = ParentNode("UL", [], None)
+                lines = block.split("\n")
+                for l in lines:
+                    text_nodes = text_to_textnodes(l)
+                    block_html_node_head.children.append(
+                        ParentNode(
+                            "LI",
+                            list( map( 
+                                lambda n: n.to_html_node(), text_nodes
+                            ))
+                        )
+                    )
             case "ordered_list":
-                pass
+                block = re.sub(r"^\d+?\.\s", "", block, 0,  re.M)
+                #print(block)
+                
+                block_html_node_head = ParentNode("OL", [], None)
+                lines = block.split("\n")
+                for l in lines:
+                    text_nodes = text_to_textnodes(l)
+                    block_html_node_head.children.append(
+                        ParentNode(
+                            "LI",
+                            list( map( 
+                                lambda n: n.to_html_node(), text_nodes
+                            ))
+                        )
+                    )
             case _:
                 raise ValueError(f"Unknown block type in {self} - markdown_to_html_node(self, markdown)")
         return block_html_node_head
