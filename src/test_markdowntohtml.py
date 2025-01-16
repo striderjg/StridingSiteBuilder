@@ -11,13 +11,17 @@ class TestMarkdownToHtml(unittest.TestCase):
             "# A level 1 heading",
             "### A level 3 heading",
             "A two line paragraph\na second line\n\nA second paragraph",
-            "This is **text** with an *italic* word and a `code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)"
+            "This is **text** with an *italic* word and a `code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)",
+            "```\nThis is a code block with markup on it's own line\n```",
+            "```A code block\nstarting and ending on same line as markup```",
+            "```A singleline code block```"
         ]
 
         b = WebGen.markdown_to_blocks(t)
         for test in test_cases:
             ret = web_obj.markdown_to_html_node(test)
             for node in ret:
+                #print(node)
                 print(node.to_html())
 
         '''

@@ -54,6 +54,15 @@ class WebGen:
                     None
                 )
             case "code":
+                block = block[3:-3]
+                block_text_nodes = text_to_textnodes(block)
+                block_html_node_head = ParentNode(
+                    "CODE",
+                    list( map(
+                        lambda n: n.to_html_node(), block_text_nodes
+                    )),
+                    None
+                )
                 pass
             case "quote":
                 pass
