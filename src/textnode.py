@@ -1,5 +1,6 @@
 from enum import Enum
 import re
+from leafnode import LeafNode
 
 class TextType(Enum):
     NORMAL = "normal"
@@ -18,6 +19,28 @@ class TextNode:
     
     def __repr__(self):
         return f"TextNode({self.text}, {self.text_type.value}, {self.url})"
+    
+    def to_html_node(self):
+        html_tag = None
+        html_body = self.text
+        props = None
+        match self.text_type:
+            case TextType.BOLD:
+                html_tag = "B"
+            case TextType.ITALIC:
+                html_tag = "I"
+            case TextType.CODE:
+                html_tag = "CODE"
+            case TextType.LINK:
+                html_tag = "a"
+                props = {"href": self.url}
+            case TextType.IMAGE:
+                html_tag = "IMG"
+                props = {"src": self.url, "alt": self.text}
+                html_body = None
+
+        return LeafNode(html_tag, html_body, props)
+            
     
 def text_to_textnodes(text):
     lst_nodes = [TextNode(text, TextType.NORMAL)]

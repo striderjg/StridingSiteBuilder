@@ -7,4 +7,11 @@ class LeafNode(HTMLNode):
     def to_html(self):
         if not self.tag:
             return self.value
-        return f"<{self.tag}{self.props_to_html()}>{self.value}</{self.tag}>"
+        
+        ret_str = ""
+        ret_str =  f"<{self.tag}{self.props_to_html()}>"
+        if(self.value):
+            ret_str = ret_str + self.value
+        if(self.tag.casefold() != "img"):
+            ret_str = ret_str + f"</{self.tag}>"
+        return ret_str
