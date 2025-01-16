@@ -46,8 +46,12 @@ class WebGen:
         out_file_fh.write(self.html_page)
         return
     
+    # Desc:     WebGen Method.  Extracts title from attribute markdown_file and stores in attribute title
+    # Desc:     self.markdown_file set with string containing  markdown
     def extract_title(self):
         title = re.search(r"^#\s(.*?)$", self.markdown_file, re.M)
+        if(not title):
+            raise Exception("WebGen.extract_title() - No H1 in markdown to set title")
         self.title = title.group(1)
         return self.title
 
