@@ -107,7 +107,7 @@ class WebGen:
                     None
                 )
             case "quote":
-                block = re.sub(r"^> ", "", block, 0,  re.M)
+                block = re.sub(r"^>", "", block, 0,  re.M)
                 #print(block)
                 block_text_nodes = text_to_textnodes(block)
                 block_html_node_head = ParentNode(
